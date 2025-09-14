@@ -9,7 +9,7 @@ options:
 
 substitutions:
   _SERVICE: "sharesguru-graph-agent"
-  _REPO: "sharesguru-graph-agent"     # Artifact Registry repo name
+  _REPO: "sharesguru-agent"     # Artifact Registry repo name
   _LOCATION: "asia-south1"      # Change to your region
   _GOOGLE_GENAI_USE_VERTEXAI: "true"
 
