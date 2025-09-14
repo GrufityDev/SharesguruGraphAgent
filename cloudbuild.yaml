@@ -1,0 +1,58 @@
+# cloudbuild.yaml
+# Builds your Dockerfile, pushes to Artifact Registry, and deploys to Cloud Run.
+# Uses Cloud Logging only to satisfy the "build.service_account requires logging choice" rule.
+
+timeout: "1200s"
+
+options:
+  logging: CLOUD_LOGGING_ONLY   # ← Option 1
+
+substitutions:
+  _SERVICE: "sharesguru-graph-agent"
+  _REPO: "sharesguru-graph-agent"     # Artifact Registry repo name
+  _LOCATION: "asia-south1"      # Change to your region
+  _GOOGLE_GENAI_USE_VERTEXAI: "true"
+
+steps:
+  # Build image from Dockerfile
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+      - -f
+      - Dockerfile
+      - .
+
+  # Push :SHORT_SHA
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+
+  # (Optional) also tag & push :latest
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - tag
+      - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+      - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:latest
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:latest
+
+  # Deploy to Cloud Run
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+      - --region=${_LOCATION}
+      - --allow-unauthenticated
+      - --set-env-vars=GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=${_LOCATION},GOOGLE_GENAI_USE_VERTEXAI=${_GOOGLE_GENAI_USE_VERTEXAI}
+
+images:
+  - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
+  - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:latest
