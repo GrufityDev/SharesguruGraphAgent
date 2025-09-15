@@ -13,7 +13,7 @@ from .subagents.stock_analyst.agent import stock_analyst_agent
 from .subagents.stock_screener.agent import stock_screener_agent
 from .subagents.stock_info.agent import stock_info_agent
 
-from ..utils.helper import sanitize_tickers
+from .utils.helper import sanitize_tickers
 
 _base_orchestrator = LlmAgent(
     model=os.getenv("ORCHESTRATOR_MODEL"),
