@@ -24,6 +24,7 @@ def _sanitize(text: str) -> str:
 # --- main orchestrator agent --------------------------------------------------
 orchestrator_agent = LlmAgent(
     model=os.getenv("ORCHESTRATOR_MODEL", ""),
+    # model="gemini-1.5-flash-002",
     name="orchestrator_agent",
     instruction=ORCHESTRATOR_PROMPT,
     tools=[

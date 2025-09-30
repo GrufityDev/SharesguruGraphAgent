@@ -12,7 +12,7 @@ from .prompt import ANALYST_PROMPT
 load_dotenv()
 
 # ── MCP server (Streamable HTTP) ─────────────────────────────────────────────
-MCP_URL = os.getenv("MCP_BASE","")
+MCP_URL = os.getenv("MCP_GRAPH_BASE","")
 MCP_TOKEN = os.getenv("MCP_TOKEN")  # optional bearer
 
 print(MCP_URL)
